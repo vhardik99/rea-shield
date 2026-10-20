@@ -116,4 +116,4 @@ A GitHub Actions workflow tests Node.js 20, 22, and 24. The lockfile should be g
 
 ## License
 
-MIT. See `LICENSE`.
+MIT. See the [LICENSE](LICENSE) file for details.
