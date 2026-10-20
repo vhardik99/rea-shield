@@ -151,6 +151,9 @@ export function calculatePrice(base, rate, quantity) {
                     try {
                         data = JSON.parse(raw);
                     } catch {
+                        if (response.headers.get('x-vercel-mitigated') || /Security Checkpoint/i.test(raw)) {
+                            throw new Error('Request blocked by Vercel\'s security checkpoint (too many audits in a short time). Reload the page, wait a minute, and try again.');
+                        }
                         throw new Error(`Backend returned non-JSON (HTTP ${response.status}). Is /api/audit deployed? Response: ${raw.slice(0, 80).replace(/</g, '&lt;')}`);
                     }
 
