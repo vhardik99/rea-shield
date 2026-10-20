@@ -1,8 +1,7 @@
 {
   "framework": null,
   "buildCommand": "",
-  "installCommand": "",
-  "outputDirectory": ".",
+  "outputDirectory": "public",
   "functions": {
     "api/audit.js": { "maxDuration": 10 }
   },
