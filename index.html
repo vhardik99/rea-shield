@@ -100,49 +100,67 @@ export function calculatePrice(base, rate, quantity) {
     </footer>
 
     <script>
-        let currentMode = 'code';
+            let currentMode = 'code';
 
-        function switchMode(mode) {
-            currentMode = mode;
-            const codeTab = document.getElementById('codeTab');
-            const urlTab = document.getElementById('urlTab');
-            const codeView = document.getElementById('codeView');
-            const urlView = document.getElementById('urlView');
+            function switchMode(mode) {
+                currentMode = mode;
+                const codeTab = document.getElementById('codeTab');
+                const urlTab = document.getElementById('urlTab');
+                const codeView = document.getElementById('codeView');
+                const urlView = document.getElementById('urlView');
 
-            if (mode === 'code') {
-                codeTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 transition";
-                urlTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-950 text-slate-400 border border-slate-800 transition";
-                codeView.classList.remove('hidden');
-                urlView.classList.add('hidden');
-            } else {
-                urlTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 transition";
-                codeTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-950 text-slate-400 border border-slate-800 transition";
-                urlView.classList.remove('hidden');
-                codeView.classList.add('hidden');
+                if (mode === 'code') {
+                    codeTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 transition";
+                    urlTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-950 text-slate-400 border border-slate-800 transition";
+                    codeView.classList.remove('hidden');
+                    urlView.classList.add('hidden');
+                } else {
+                    urlTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 transition";
+                    codeTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-950 text-slate-400 border border-slate-800 transition";
+                    urlView.classList.remove('hidden');
+                    codeView.classList.add('hidden');
+                }
             }
-        }
 
-        function runAuditSimulation() {
-            const output = document.getElementById('reportOutput');
-            const target = currentMode === 'code' ? 'Source Code' : document.getElementById('urlInput').value || 'Target URL';
+            async function runAuditSimulation() {
+                const output = document.getElementById('reportOutput');
+                const inputVal = currentMode === 'code' ? document.getElementById('sourceInput').value : document.getElementById('urlInput').value;
 
-            output.innerHTML = `<p class="text-cyan-400">[1/3] Connecting to target (${currentMode.toUpperCase()})...</p>`;
+                if (!inputVal) {
+                    output.innerHTML = `<p class="text-red-400">Error: Please provide ${currentMode === 'code' ? 'source code' : 'a target URL'}.</p>`;
+                    return;
+                }
 
-            setTimeout(() => {
-                output.innerHTML += `<p class="text-amber-400">[2/3] Analyzing AST patterns & exposure signals...</p>`;
-            }, 400);
+                output.innerHTML = `<p class="text-cyan-400">[1/3] Connecting to backend API (${currentMode.toUpperCase()})...</p>`;
 
-            setTimeout(() => {
-                output.innerHTML += `
-                    <p class="text-emerald-400">[3/3] Audit complete!</p>
-                    <div class="mt-2 p-2 bg-slate-900 rounded border border-slate-800 text-slate-300">
-                        <strong>Target:</strong> ${target.slice(0, 30)}...<br>
-                        <strong>Static Exposure Score:</strong> 18/100 (Protected)<br>
-                        <strong>VM Opcodes Generated:</strong> 14 opcodes
-                    </div>
-                `;
-            }, 800);
-        }
-    </script>
+                try {
+                    const payload = currentMode === 'code' ? { sourceCode: inputVal } : { url: inputVal };
+
+                    const response = await fetch('/api/audit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        throw new Error(data.error || 'Audit analysis failed');
+                    }
+
+                    output.innerHTML = `
+                        <p class="text-emerald-400">[3/3] Real Backend Audit Complete!</p>
+                        <div class="mt-2 p-2 bg-slate-900 rounded border border-slate-800 text-slate-300 space-y-1">
+                            <strong>Target:</strong> ${(data.target || inputVal).slice(0, 35)}...<br>
+                            <strong>Static Exposure Score:</strong> <span class="text-cyan-400 font-bold">${data.exposureScore}/100</span><br>
+                            <strong>VM Opcodes Generated:</strong> ${data.bytecodeInstructionsCount || 0}<br>
+                            <strong>Findings:</strong> ${data.findings ? data.findings.length : 0} items detected
+                        </div>
+                    `;
+                } catch (err) {
+                    output.innerHTML = `<p class="text-red-400">Error: ${err.message}</p>`;
+                }
+            }
+        </script>
 </body>
 </html>
