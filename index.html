@@ -14,7 +14,7 @@
             <div class="flex items-center space-x-3">
                 <div class="h-8 w-8 bg-cyan-500 rounded-lg flex items-center justify-center font-bold text-slate-950 text-xl">R</div>
                 <span class="font-bold text-lg tracking-tight">REA-Shield</span>
-                <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">v0.4</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/25">v0.4</span>
             </div>
             <div>
                 <a href="https://github.com/vhardik99/rea-shield" target="_blank" class="text-sm bg-slate-900 hover:bg-slate-800 border border-slate-700 px-4 py-2 rounded-lg font-medium transition flex items-center space-x-2">
@@ -47,14 +47,31 @@
                 <span class="text-xs text-slate-400">Interactive Simulation</span>
             </div>
 
+            <!-- Input Mode Selector -->
+            <div class="flex space-x-4 mb-4">
+                <button onclick="switchMode('code')" id="codeTab" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 transition">Paste Code</button>
+                <button onclick="switchMode('url')" id="urlTab" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-950 text-slate-400 border border-slate-800 transition">Test Website URL</button>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Input Code -->
+                <!-- Inputs Section -->
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Source Code Input</label>
-                    <textarea id="sourceInput" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-sm text-slate-300 focus:outline-none focus:border-cyan-500">// @rea-protect
+                    <!-- Code Input View -->
+                    <div id="codeView">
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Source Code Input</label>
+                        <textarea id="sourceInput" rows="7" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-sm text-slate-300 focus:outline-none focus:border-cyan-500">// @rea-protect
 export function calculatePrice(base, rate, quantity) {
   return (base * rate + base) * quantity;
 }</textarea>
+                    </div>
+
+                    <!-- URL Input View -->
+                    <div id="urlView" class="hidden">
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Target Website or Script URL</label>
+                        <input type="text" id="urlInput" placeholder="https://example.com/app.js" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-sm text-slate-300 focus:outline-none focus:border-cyan-500 mb-4">
+                        <p class="text-xs text-slate-500">Fetches and runs AST static exposure signals on the remote script endpoint.</p>
+                    </div>
+
                     <button onclick="runAuditSimulation()" class="mt-3 w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold py-2.5 rounded-lg transition text-sm">
                         Run Audit & Virtualization
                     </button>
@@ -65,7 +82,7 @@ export function calculatePrice(base, rate, quantity) {
                     <div>
                         <div class="text-slate-400 mb-2 uppercase tracking-wider border-b border-slate-900 pb-1">Audit & Protection Report</div>
                         <div id="reportOutput" class="text-slate-300 space-y-2">
-                            <p class="text-slate-500">// Click 'Run Audit' to inspect code exposure and bytecode transformation status...</p>
+                            <p class="text-slate-500">// Select input method and click 'Run Audit' to inspect code exposure...</p>
                         </div>
                     </div>
                     <div class="mt-4 pt-3 border-t border-slate-900 flex justify-between items-center text-slate-400">
@@ -83,26 +100,48 @@ export function calculatePrice(base, rate, quantity) {
     </footer>
 
     <script>
-        function runAuditSimulation() {
-            const code = document.getElementById('sourceInput').value;
-            const output = document.getElementById('reportOutput');
+        let currentMode = 'code';
 
-            output.innerHTML = `<p class="text-cyan-400">[1/3] Parsing Abstract Syntax Tree (AST)...</p>`;
+        function switchMode(mode) {
+            currentMode = mode;
+            const codeTab = document.getElementById('codeTab');
+            const urlTab = document.getElementById('urlTab');
+            const codeView = document.getElementById('codeView');
+            const urlView = document.getElementById('urlView');
+
+            if (mode === 'code') {
+                codeTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 transition";
+                urlTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-950 text-slate-400 border border-slate-800 transition";
+                codeView.classList.remove('hidden');
+                urlView.classList.add('hidden');
+            } else {
+                urlTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 transition";
+                codeTab.className = "text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-950 text-slate-400 border border-slate-800 transition";
+                urlView.classList.remove('hidden');
+                codeView.classList.add('hidden');
+            }
+        }
+
+        function runAuditSimulation() {
+            const output = document.getElementById('reportOutput');
+            const target = currentMode === 'code' ? 'Source Code' : document.getElementById('urlInput').value || 'Target URL';
+
+            output.innerHTML = `<p class="text-cyan-400">[1/3] Connecting to target (${currentMode.toUpperCase()})...</p>`;
 
             setTimeout(() => {
-                output.innerHTML += `<p class="text-amber-400">[2/3] Analyzing static exposure signals...</p>`;
-            }, 300);
+                output.innerHTML += `<p class="text-amber-400">[2/3] Analyzing AST patterns & exposure signals...</p>`;
+            }, 400);
 
             setTimeout(() => {
                 output.innerHTML += `
-                    <p class="text-emerald-400">[3/3] Transformation successful!</p>
+                    <p class="text-emerald-400">[3/3] Audit complete!</p>
                     <div class="mt-2 p-2 bg-slate-900 rounded border border-slate-800 text-slate-300">
-                        <strong>Exposure Score:</strong> 12/100 (Low)<br>
-                        <strong>Annotated Functions:</strong> 1 found<br>
-                        <strong>VM Instructions Generated:</strong> 14 opcodes
+                        <strong>Target:</strong> ${target.slice(0, 30)}...<br>
+                        <strong>Static Exposure Score:</strong> 18/100 (Protected)<br>
+                        <strong>VM Opcodes Generated:</strong> 14 opcodes
                     </div>
                 `;
-            }, 600);
+            }, 800);
         }
     </script>
 </body>
