@@ -13,7 +13,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { sourceCode, url } = req.body;
+    let body = req.body || {};
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch { body = {}; }
+    }
+    const { sourceCode, url } = body;
     let targetDescription = 'Custom Source Code';
     let codeContent = sourceCode || '// Default code snippet';
 

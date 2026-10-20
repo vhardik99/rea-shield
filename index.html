@@ -136,13 +136,23 @@ export function calculatePrice(base, rate, quantity) {
                 try {
                     const payload = currentMode === 'code' ? { sourceCode: inputVal } : { url: inputVal };
 
+                    if (location.protocol === 'file:') {
+                        throw new Error('Open this page via a server (e.g. `vercel dev`), not as a local file — /api/audit is unavailable.');
+                    }
+
                     const response = await fetch('/api/audit', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
 
-                    const data = await response.json();
+                    const raw = await response.text();
+                    let data;
+                    try {
+                        data = JSON.parse(raw);
+                    } catch {
+                        throw new Error(`Backend returned non-JSON (HTTP ${response.status}). Is /api/audit deployed? Response: ${raw.slice(0, 80).replace(/</g, '&lt;')}`);
+                    }
 
                     if (!data.success) {
                         throw new Error(data.error || 'Audit analysis failed');
