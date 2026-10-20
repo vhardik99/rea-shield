@@ -1,0 +1,20 @@
+{
+  "version": "0.4.0",
+  "file": "/Users/vyas/Downloads/rea-shield/fixtures/sample.js",
+  "findings": [],
+  "metrics": {
+    "functions": 1,
+    "annotatedFunctions": 1,
+    "totalComplexity": 1
+  },
+  "functionMetrics": [
+    {
+      "name": "calculatePrice",
+      "line": 2,
+      "complexity": 1,
+      "annotated": true
+    }
+  ],
+  "heuristicExposureScore": 99,
+  "scoreMeaning": "Heuristic triage indicator only; not a probability of compromise or reconstruction."
+}

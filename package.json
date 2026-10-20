@@ -1,0 +1,47 @@
+{
+  "name": "rea-shield",
+  "version": "0.4.0",
+  "description": "Cross-platform JavaScript source exposure auditing, constrained transformation, and differential verification",
+  "type": "module",
+  "bin": {
+    "rea-shield": "./bin/rea-shield.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./audit": "./src/audit.mjs",
+    "./protect": "./src/protect.mjs",
+    "./verify": "./src/verify.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "fixtures/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "test": "node --test",
+    "audit:fixture": "node bin/rea-shield.mjs audit fixtures/sample.js",
+    "protect:fixture": "node bin/rea-shield.mjs protect fixtures/sample.js --out .tmp/protected_sample.mjs",
+    "verify:fixture": "node bin/rea-shield.mjs verify fixtures/sample.js .tmp/protected_sample.mjs --vectors fixtures/sample.vectors.json",
+    "benchmark:fixture": "node bin/rea-shield.mjs benchmark fixtures/sample.js --vectors fixtures/sample.vectors.json --out .tmp/benchmark.json"
+  },
+  "keywords": [
+    "javascript",
+    "security",
+    "ast",
+    "obfuscation",
+    "reverse-engineering",
+    "differential-testing"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@babel/generator": "^7.26.10",
+    "@babel/parser": "^7.26.10",
+    "@babel/traverse": "^7.26.10",
+    "@babel/types": "^7.26.10"
+  }
+}

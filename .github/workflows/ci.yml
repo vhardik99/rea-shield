@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["20", "22", "24"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install --no-audit --no-fund
+      - name: Syntax checks
+        run: |
+          node --check bin/rea-shield.mjs
+          node --check src/cli.mjs
+          node --check src/audit.mjs
+          node --check src/protect.mjs
+          node --check src/verify.mjs
+      - name: CLI help
+        run: node bin/rea-shield.mjs --help
+      - name: Unit tests
+        run: npm test
+      - name: Audit fixture
+        run: npm run audit:fixture
+      - name: Transform fixture
+        run: npm run protect:fixture
+      - name: Differential verification
+        run: npm run verify:fixture
+      - name: Benchmark
+        run: npm run benchmark:fixture
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rea-shield-reports-node-${{ matrix.node }}
+          if-no-files-found: ignore
+          path: |
+            .tmp/*.json
+            fixtures/protected_sample.js
+            fixtures/protected_sample.mjs
