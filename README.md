@@ -34,14 +34,6 @@ npm ci
 npm test
 ```
 
-The GitHub URL is a placeholder until you publish the repository. For a local package install:
-
-```bash
-npm install
-npm link
-rea-shield --help
-```
-
 If you prefer not to use a global link, run `node bin/rea-shield.mjs --help`.
 
 ## Quick start
